@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+import json
+
 from restart import http
 
 
@@ -6,9 +10,13 @@ from restart import http
 #         pass
 
 
-@http.api_endpoint
+api_endpoint = http.api_endpoint(accept="application/json", serializer=json.dumps,
+                                 unserializer=json.loads)
+
+
+@api_endpoint
 def users(request):
-    return http.Ok("get request")
+    return request.get_response(request.data, response_type=http.Ok)
 
 
 @users.post

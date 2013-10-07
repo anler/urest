@@ -4,6 +4,7 @@ from django.conf.urls import patterns, include, url
 # from django.contrib import admin
 # admin.autodiscover()
 
+# It's better to not add a trailing / to your urls
 urlpatterns = patterns('',
     url(r'^v1/users$', 'demo.views.users', name='users'),
     # url(r'^demo/', include('demo.foo.urls')),
