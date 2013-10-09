@@ -6,10 +6,10 @@ import rest.test
 request_factory = rest.test.RequestFactory()
 
 
-class TestApiEndpointDecorator:
+class TestHandlerDecorator:
 
     def test_unsupported_media_type(self):
-        @rest.api_endpoint(accept="")
+        @rest.handler(accept="")
         def view(request):
             return rest.Ok()
 
@@ -18,7 +18,7 @@ class TestApiEndpointDecorator:
         assert response.status_code == 415
 
     def test_not_allowed_method(self):
-        @rest.api_endpoint
+        @rest.handler
         def view(request):
             return rest.Ok()
 

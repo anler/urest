@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .handlers import api_endpoint
+from .handlers import handler
 from .http import (
     Ok,
     Created,

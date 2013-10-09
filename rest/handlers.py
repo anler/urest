@@ -9,16 +9,16 @@ def is_mediatype_supported(mediatype, accepted):
     return fnmatch(mediatype, accepted)
 
 
-def api_endpoint(view=None, accept=None, serializer=None, unserializer=None):
+def handler(view=None, accept=None, serializer=None, unserializer=None):
     def decorator(view):
         wrapper = wraps(view)
-        return wrapper(api_endpoint_property(view, accept=accept, serializer=serializer,
+        return wrapper(handler_property(view, accept=accept, serializer=serializer,
                                              unserializer=unserializer))
 
     return decorator if view is None else decorator(view)
 
 
-class api_endpoint_property(object):
+class handler_property(object):
 
     def __init__(self, get=None, head=None, post=None, put=None, delete=None, accept=None,
                  serializer=None, unserializer=None):
