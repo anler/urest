@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+from collections import namedtuple
 from functools import wraps
 from fnmatch import fnmatch
 
-from . import http
+from . import response
+
+
+ResourceMetadata = namedtuple("ResourceMetadata", "resource url args kwargs")
 
 
 def is_mediatype_supported(mediatype, accepted):
@@ -13,7 +17,7 @@ def handler(view=None, accept=None, serializer=None, unserializer=None):
     def decorator(view):
         wrapper = wraps(view)
         return wrapper(handler_property(view, accept=accept, serializer=serializer,
-                                             unserializer=unserializer))
+                                        unserializer=unserializer))
 
     return decorator if view is None else decorator(view)
 
@@ -37,7 +41,6 @@ class handler_property(object):
         self._accept = accept
         self._serializer = serializer
         self._unserializer = unserializer
-
 
     def __call__(self, *args, **kwargs):
         return self.dispatch(*args, **kwargs)
@@ -102,3 +105,61 @@ def strip_charset(content_type):
     except ValueError:
         pass
     return content_type
+
+
+def resource_as_view(resource_class):
+    def view(request, *args, **kwargs):
+        resource = resource_class()
+        return resource.dispatch(request, *args, **kwargs)
+    return view
+
+
+class BaseResource:
+    def dispatch(self, request, *args, **kwargs):
+        dispatcher = getattr(self, request.method.lower(), None)
+        if dispatcher is None:
+            return response.MethodNotAllowed()
+
+        content_type = strip_charset(request.META["CONTENT_TYPE"])
+        # if not is_mediatype_supported(content_type, self._accept):
+            # return response.UnsupportedMediaType()
+
+        # request.__class__.data = DataDescriptor(self._unserializer)
+        # request.__class__.get_response = ResponseDescriptor(self._serializer)
+
+        return dispatcher(request, *args, **kwargs)
+
+
+class Collection(BaseResource):
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def post(self, request, *args, **kwargs):
+        pass
+
+
+class Document(BaseResource):
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def put(self, request, *args, **kwargs):
+        pass
+
+    def delete(self, request, *args, **kwargs):
+        pass
+
+
+class Store(BaseResource):
+    def get(self, request, *args, **kwargs):
+        pass
+
+    def put(self, request, *args, **kwargs):
+        pass
+
+    def delete(self, request, *args, **kwargs):
+        pass
+
+
+class Controller(BaseResource):
+    def post(self, request, *args, **kwargs):
+        pass
