@@ -71,7 +71,7 @@ setup(
     name='urest',
     version=version,
     url='',
-    license='BSD',
+    license='MIT',
     description='Web APIs for Django, made easy.',
     author='Anler Hp',
     author_email='hello@anler.me',

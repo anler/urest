@@ -2,14 +2,14 @@ import inspect
 
 from django.utils.module_loading import import_module
 
-from .resource import BaseResource, ResourceMetadata
+from .views import View, ViewMetadata
 
 
-def is_resource(definition):
-    return inspect.isclass(definition) and issubclass(definition, BaseResource)
+def is_view(definition):
+    return inspect.isclass(definition) and issubclass(definition, View)
 
 
-def autodiscover_resources(module_to_search):
+def autodiscover_views(module_to_search):
     from django.apps import apps
     for app_config in apps.get_app_configs():
         try:
@@ -17,12 +17,12 @@ def autodiscover_resources(module_to_search):
         except:
             pass
         else:
-            for member in inspect.getmembers(module, predicate=is_resource):
+            for member in inspect.getmembers(module, predicate=is_view):
                 yield member
 
 
-def get_resource_metadata(name, resource, url=None, args=None, kwargs=None):
-    doc = inspect.getdoc(resource)
+def get_view_metadata(name, view, url=None, args=None, kwargs=None):
+    doc = inspect.getdoc(view)
     if not doc:
         doc = "/{}".format(url=name.lower())
     if args is None:
@@ -32,10 +32,10 @@ def get_resource_metadata(name, resource, url=None, args=None, kwargs=None):
     if url is None:
         url = doc.split("\n")[0]
 
-    urlname = "{module}.{name}".format(module=inspect.getmodule(resource).__name__, name=name)
+    urlname = "{module}.{name}".format(module=inspect.getmodule(view).__name__, name=name)
     kwargs.setdefault("name", urlname)
 
-    return ResourceMetadata(resource, clean_url(url), args, kwargs)
+    return ViewMetadata(view, clean_url(url), args, kwargs)
 
 
 def clean_url(url):

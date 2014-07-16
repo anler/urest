@@ -1,21 +1,20 @@
 from django.conf import urls
 
-from .resource import resource_as_view
-from .utils import get_resource_metadata
+from .views import as_view
+from .utils import get_view_metadata
 
 
 class Site(object):
     def __init__(self):
-        self._registry = {}  # url -> metadata
+        self.registry = {}  # url -> metadata
 
-    def register(self, name, resource, url=None, args=None, kwargs=None):
-        metadata = get_resource_metadata(name, resource, url, args, kwargs)
-        self._registry[(metadata.url, metadata.args)] = metadata
+    def register(self, name, view, url=None, args=None, kwargs=None):
+        metadata = get_view_metadata(name, view, url, args, kwargs)
+        self.registry[(metadata.url, metadata.args)] = metadata
 
     @property
     def urls(self):
-        pattern_urls = [urls.url(m.url, resource_as_view(m.resource), *m.args, **m.kwargs)
-                        for m in self._registry.values()]
-        assert len(pattern_urls) == 2
+        pattern_urls = [urls.url(m.url, as_view(m.view), *m.args, **m.kwargs)
+                        for m in self.registry.values()]
         return urls.patterns('', *pattern_urls)
 site = Site()
