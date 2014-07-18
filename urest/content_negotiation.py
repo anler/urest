@@ -91,3 +91,7 @@ def parse_media_range(string):
 def parse_and_sort_media_range(media_range):
     media_types = parse_media_range(media_range)
     return sorted(media_types, reverse=True)
+
+
+def get_serializer(request, serializers):
+    "Find a matching serializer or raise MissingSerializer"

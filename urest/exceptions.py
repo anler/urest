@@ -5,7 +5,7 @@ class MissingSerializer(Exception):
     "Exception raised to indicate that a serializer couldn't be found to fullfill the request"
 
 
-class MissingDispatcherMethod(Exception):
+class MissingMethod(Exception):
     "Exception raised to indicate that the resource can't handle the request method"
 
 

@@ -1,6 +1,8 @@
 import inspect
 
-from .exceptions import MissingSerializer, MissingDispatcherMethod
+from .exceptions import MissingSerializer, MissingMethod
+from .response import statuses
+from . import content_negotiation
 
 
 HTTP_METHODS = {"get", "head", "options", "post", "put", "patch", "delete"}
@@ -15,7 +17,8 @@ def get_dispatcher(view, method):
     try:
         return getattr(view, method)
     except AttributeError:
-        raise MissingDispatcherMethod
+        allow = get_allowed_methods(view)
+        raise MissingMethod(allow)
 
 
 def get_allowed_methods(view):
@@ -24,14 +27,21 @@ def get_allowed_methods(view):
 
 
 def dispatch(view, request, *args, **kwargs):
-    method = request.headers.get("X-Http-Method-Override", request.method).lower()
+    method = request.method.lower()
 
     try:
         dispatcher = get_dispatcher(view, method)
-        response = dispatcher(request, *args, **kwargs)
+        serializer = content_negotiation.get_serializer(request, view.get_serializers())
+        data = dispatcher(request, *args, **kwargs)
+        request.response.headers["Content-Type"] = serializer.content_type
+        request.response.body = serializer.dumps(data)
     except MissingSerializer:
-        response = response.UnsupportedMediaType()
-    except MissingDispatcherMethod:
-        response = response.MethodNotAllowed(allowed=get_allowed_methods(view))
+        request.response.status = statuses.NotAcceptable
+    except MissingMethod as e:
+        request.response.status = statuses.MethodNotAllowed
+        request.response.headers["Allow"] = e.allow
+    except Exception as e:
+        request.response.status = statuses.InternalServerError
+        request.response.body = serializer.dumps(e.message)
 
-    return response
+    return request.response
